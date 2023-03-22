@@ -1,0 +1,87 @@
+linters:
+  enable:
+    # Lint
+    - revive
+    - gocritic
+    - goconst
+    # Bugs
+    - bodyclose
+    - nonamedreturns
+    # Format
+    - decorder
+    - dupl
+    - gofumpt
+    # Security
+    - depguard
+    - gosec
+    # Perf
+    - prealloc
+    - unconvert
+
+linters-settings:
+  govet:
+    check-shadowing: true
+  goconst:
+    min-len: 8
+    min-occurrences: 3
+  gocritic:
+    enabled-checks:
+      - appendAssign
+      - appendCombine
+      - argOrder
+      - assignOp
+      - badCond
+      - boolExprSimplify
+      - captLocal
+      - caseOrder
+      - commentFormatting
+      - commentedOutCode
+      - commentedOutImport
+      - defaultCaseOrder
+      - deferUnlambda
+      - dupCase
+      - elseif
+      - filepathJoin
+      - hexLiteral
+      - httpNoBody
+      - hugeParam
+      - equalFold
+      - indexAlloc
+      - preferDecodeRune
+      - preferFilepathJoin
+      - rangeExprCopy
+      - rangeValCopy
+      - sliceClear
+      - stringXbytes
+  revive:
+    ignore-generated-header: false
+    severity: warning
+    confidence: 0.8
+    errorCode: 0
+    warningCode: 0
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: var-declaration
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: unexported-return
+      - name: indent-error-flow
+      - name: errorf
+      - name: empty-block
+      - name: superfluous-else
+      - name: unused-parameter
+      - name: unreachable-code
+      - name: redefines-builtin-id
+      - name: early-return

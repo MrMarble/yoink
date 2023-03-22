@@ -1,0 +1,22 @@
+prowlarr: # prowlarr connection. Can be passed by env or arg
+  host: "https://localhost:9696"
+  api_key: "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+qbittorrent: # qbittorrent connection. Can be passed by env or arg
+  host: "https://localhost:8080"
+  # not needed if access is open
+  user: "admin"
+  password: "admin"
+
+# used to calculate available space.
+download_dir: "/media/downloads/free_leech"
+total_freeleech_size: 200Gb
+# qBitTorrent category to set to torrents
+category: "FreeLeech"
+
+# Indexer configuration. If not present will be ignored
+indexers:
+  - id: 2
+  - id: 11 # prowlarr indexer ID
+    max_size: 40Gb # max file size to download
+    max_seeders: 10 # if seeders are greater than this torrent will be ignored

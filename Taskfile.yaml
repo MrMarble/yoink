@@ -1,0 +1,14 @@
+version: "3"
+
+dotenv: [".env"]
+
+tasks:
+  run:
+    cmds:
+      - go run ./cmd/yoink {{.CLI_ARGS}}
+  lint:
+    cmds:
+      - golangci-lint run --fix
+  test:
+    cmds:
+      - go test -race -coverprofile=coverage.txt -covermode=atomic ./...
