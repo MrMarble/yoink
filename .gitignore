@@ -2,4 +2,6 @@
 config.yaml
 .vscode
 /yoink
+/yoink.exe
 /coverage.txt
+/dist
