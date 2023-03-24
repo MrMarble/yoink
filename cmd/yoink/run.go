@@ -26,7 +26,8 @@ func (r *RunCmd) Run(ctx *Context) error {
 	}
 
 	qClient := qbittorrent.NewClient(ctx.config.QbitTorrent.Host)
-	for _, torrent := range torrents {
+	for i := range torrents {
+		torrent := torrents[i]
 		fmt.Printf("Downloading %s\n", torrent.Title)
 		data, err := yoink.DownloadTorrent(&torrent, ctx.config)
 		if err != nil {

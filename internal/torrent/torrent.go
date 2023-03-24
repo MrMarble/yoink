@@ -8,7 +8,6 @@ import (
 type Torrent struct {
 	Announce string
 	Name     string
-	Length   int
 }
 
 func ParseTorrentFile(file []byte) (*Torrent, error) {
@@ -20,6 +19,5 @@ func ParseTorrentFile(file []byte) (*Torrent, error) {
 
 	t.Announce = string(data.(map[string]interface{})["announce"].([]uint8))
 	t.Name = string(data.(map[string]interface{})["info"].(map[string]interface{})["name"].([]uint8))
-	// t.Length = int(data.(map[string]interface{})["info"].(map[string]interface{})["length"].(int64))
 	return &t, nil
 }

@@ -106,7 +106,7 @@ func FilterTorrentBySize(torrents []prowlarr.SearchResult, config *Config) ([]pr
 	}
 
 	// If the total size of the torrents is greater than the max freelech size, don't download anything
-	if totalSize >= uint64(config.TotalFreelechSize) {
+	if totalSize >= config.TotalFreelechSize {
 		return nil, nil
 	}
 
@@ -124,7 +124,7 @@ func filterTorrentsByDiskSize(config *Config, totalSize uint64, torrents []prowl
 	availableSpace := du.Available(config.DownloadDir) - totalSize
 
 	// If the available space is less than the max freelech size, don't download anything
-	if availableSpace < uint64(config.TotalFreelechSize) {
+	if availableSpace < config.TotalFreelechSize {
 		return nil
 	}
 
@@ -173,7 +173,7 @@ func DownloadTorrent(result *prowlarr.SearchResult, config *Config) (*bytes.Buff
 
 func downloadFile(url string) (*bytes.Buffer, error) {
 	// Get the data
-	resp, err := http.Get(url)
+	resp, err := http.Get(url) //nolint:gosec
 	if err != nil {
 		return nil, err
 	}

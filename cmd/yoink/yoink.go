@@ -67,7 +67,7 @@ type Context struct {
 }
 
 func main() {
-	var cli cli
+	var cli cli //nolint:govet
 	ctx := kong.Parse(&cli,
 		kong.Name("yoink"),
 		kong.Description("Yoink! Command line tool for finding and downloading freeleech torrents."),

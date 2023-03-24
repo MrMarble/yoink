@@ -16,9 +16,13 @@ func Available(path string) uint64 {
 		return 0
 	}
 
-	c.Call(
+	_, _, err = c.Call(
 		uintptr(unsafe.Pointer(utfPtr)),
 		uintptr(unsafe.Pointer(&available)))
+
+	if err != nil {
+		return 0
+	}
 
 	return uint64(available)
 }

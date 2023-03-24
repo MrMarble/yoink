@@ -47,7 +47,7 @@ func (c *Client) GetTorrents() ([]Torrent, error) {
 	return torrents, nil
 }
 
-func (c *Client) AddTorrentFromUrl(urls string, options map[string]string) error {
+func (c *Client) AddTorrentFromURL(urls string, options map[string]string) error {
 	data := url.Values{}
 	data.Set("urls", urls)
 	for k, v := range options {
@@ -70,10 +70,13 @@ func (c *Client) AddTorrentFromBuffer(file *bytes.Buffer, fileName string, optio
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	part, _ := writer.CreateFormFile("torrents", fileName)
-	io.Copy(part, file)
+	_, err := io.Copy(part, file)
+	if err != nil {
+		return err
+	}
 
 	for k, v := range options {
-		err := writer.WriteField(k, v)
+		err = writer.WriteField(k, v)
 		if err != nil {
 			return err
 		}

@@ -19,7 +19,7 @@ func MockServer(path, response string) *httptest.Server {
 			return
 		}
 
-		w.Write([]byte(response))
+		w.Write([]byte(response)) //nolint
 	}))
 }
 
@@ -120,7 +120,7 @@ func TestClient_Search(t *testing.T) {
 			return
 		}
 
-		w.Write([]byte(`[ { "title": "Test", "protocol": "torrent", "indexerId": 1, "downloadUrl": "http://test.com" } ]`))
+		w.Write([]byte(`[ { "title": "Test", "protocol": "torrent", "indexerId": 1, "downloadUrl": "http://test.com" } ]`)) //nolint
 	})
 	defer server.Close()
 
