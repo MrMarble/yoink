@@ -71,7 +71,7 @@ func GetTorrents(config *Config) ([]prowlarr.SearchResult, error) {
 	for _, result := range results {
 		for _, indexer := range config.Indexers {
 			if result.IndexerID == indexer.ID {
-				if (indexer.MaxSeeders == 0 || result.Seeders <= indexer.MaxSeeders) && result.Size <= indexer.MaxSize {
+				if (indexer.MaxSeeders == 0 || result.Seeders <= indexer.MaxSeeders) && result.Size <= indexer.MaxSize && result.IsFreeleech() {
 					filteredResults = append(filteredResults, result)
 				}
 			}
