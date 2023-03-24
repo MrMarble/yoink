@@ -49,6 +49,9 @@ type Config struct {
 
 	// Category to use for downloads. Used for automatic deletion of old downloads
 	Category string
+
+	// Whether to pause torrents after adding them to qBittorrent
+	Paused bool
 }
 
 // GetTorrents searches for freeleech torrents in Prowlarr and filters them based on the indexer configuration
@@ -71,7 +74,7 @@ func GetTorrents(config *Config) ([]prowlarr.SearchResult, error) {
 	for _, result := range results {
 		for _, indexer := range config.Indexers {
 			if result.IndexerID == indexer.ID {
-				if (indexer.MaxSeeders == 0 || result.Seeders <= indexer.MaxSeeders) && result.Size <= indexer.MaxSize && result.IsFreeleech() {
+				if (indexer.MaxSeeders == 0 || result.Seeders <= indexer.MaxSeeders) && result.Size <= indexer.MaxSize && result.Seeders > 0 && result.IsFreeleech() {
 					filteredResults = append(filteredResults, result)
 				}
 			}

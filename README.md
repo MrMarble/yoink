@@ -38,6 +38,9 @@ total_freeleech_size: 200Gb
 # qBitTorrent category to set to torrents
 category: "FreeLeech"
 
+# will pause torrents after adding them
+paused: true
+
 # Indexer configuration. If not present will be ignored
 indexers:
   - id: 2
@@ -74,6 +77,7 @@ Flags:
       --qbittorrent-user=STRING    qBitTorrent user to authenticante with ($QBITTORRENT_USER)
       --qbittorrent-pass=STRING    qBitTorrent password to authenticante with ($QBITTORRENT_PASS)
   -c, --config=CONFIG              configuration file.
+      --dry-run                    Dry run. Don't upload torrents to qBitTorrent.
       --version                    print version information and quit
 
 Commands:

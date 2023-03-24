@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/dustin/go-humanize"
 	"github.com/mrmarble/yoink"
@@ -26,9 +27,9 @@ func (r *RunCmd) Run(ctx *Context) error {
 	}
 
 	qClient := qbittorrent.NewClient(ctx.config.QbitTorrent.Host)
+	fmt.Println("Uploading torrents to qBittorrent...")
 	for i := range torrents {
 		torrent := torrents[i]
-		fmt.Printf("Downloading %s\n", torrent.Title)
 		data, err := yoink.DownloadTorrent(&torrent, ctx.config)
 		if err != nil {
 			return err
@@ -37,8 +38,10 @@ func (r *RunCmd) Run(ctx *Context) error {
 			fmt.Printf("Skipping %s because it's already seeding\n", torrent.Title)
 			continue
 		}
-		fmt.Printf("Uploading %s\n", torrent.Title)
-		err = qClient.AddTorrentFromBuffer(data, torrent.FileName, map[string]string{"category": ctx.config.Category})
+		fmt.Printf("[%s] [%d/%d] %s\n", humanize.Bytes(uint64(torrent.Size)), torrent.Seeders, torrent.Leechers, torrent.Title)
+		if !ctx.dryRun {
+			err = qClient.AddTorrentFromBuffer(data, torrent.FileName, map[string]string{"category": ctx.config.Category, "paused": strconv.FormatBool(ctx.config.Paused)})
+		}
 		if err != nil {
 			return err
 		}

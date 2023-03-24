@@ -33,6 +33,7 @@ type SearchResult struct {
 	DownloadURL  string   `json:"downloadUrl"`
 	IndexerFlags []string `json:"indexerFlags"`
 	Seeders      int      `json:"seeders"`
+	Leechers     int      `json:"leechers"`
 	Protocol     string   `json:"protocol"`
 }
 

@@ -36,6 +36,7 @@ type cli struct {
 	QbitTorrentPass string `help:"qBitTorrent password to authenticante with" name:"qbittorrent-pass" env:"QBITTORRENT_PASS"`
 
 	Config *config `name:"config" help:"configuration file." type:"yamlfile" short:"c"`
+	DryRun bool    `help:"Dry run. Don't upload torrents to qBittorrent."`
 
 	Run      RunCmd      `cmd:"" help:"Run yoink." default:"1" hidden:""`
 	Indexers IndexersCmd `cmd:"" help:"List indexers."`
@@ -60,10 +61,12 @@ type config struct {
 		MaxSize    string `yaml:"max_size"`
 	} `yaml:"indexers"`
 	Category string
+	Paused   bool
 }
 
 type Context struct {
 	config *yoink.Config
+	dryRun bool
 }
 
 func main() {
@@ -82,13 +85,14 @@ func main() {
 	cfg, err := unifyConfig(&cli)
 	ctx.FatalIfErrorf(err)
 
-	ctx.FatalIfErrorf(ctx.Run(&Context{config: cfg}))
+	ctx.FatalIfErrorf(ctx.Run(&Context{config: cfg, dryRun: cli.DryRun}))
 }
 
 func unifyConfig(cli *cli) (*yoink.Config, error) {
 	config := &yoink.Config{
 		DownloadDir: cli.Config.DownloadDir,
 		Category:    cli.Config.Category,
+		Paused:      cli.Config.Paused,
 	}
 
 	// Override config with CLI flags
