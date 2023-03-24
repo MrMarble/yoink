@@ -2,6 +2,9 @@ version: "3"
 
 dotenv: [".env"]
 
+env:
+  GCO_ENABLED: 0
+
 tasks:
   run:
     cmds:
@@ -11,4 +14,11 @@ tasks:
       - golangci-lint run --fix
   test:
     cmds:
-      - go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+      - go test -coverprofile=coverage.txt -covermode=atomic ./...
+  goreleaser:
+    desc: Run GoReleaser either in snapshot or release mode
+    vars:
+      SNAPSHOT:
+        sh: 'if [[ $GITHUB_REF != refs/tags/v* ]]; then echo "--snapshot"; fi'
+    cmds:
+      - goreleaser release --clean {{.SNAPSHOT}}
