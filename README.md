@@ -1,6 +1,7 @@
 # Yoink - Free leech manager
 
-![GitHub](https://img.shields.io/github/license/mrmable/yoink)
+![GitHub](https://img.shields.io/github/license/mrmarble/yoink)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mrmarble/yoink)](https://goreportcard.com/report/github.com/mrmarble/yoink)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/mrmarble/yoink)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/mrmarble/yoink)
 
