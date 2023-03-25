@@ -40,10 +40,10 @@ builds:
 
 dockers:
   - image_templates:
-      - "gcr.io/mrmarble/{{ .ProjectName }}:{{ .Tag }}"
-      - "gcr.io/mrmarble/{{ .ProjectName }}:v{{ .Major }}"
-      - "gcr.io/mrmarble/{{ .ProjectName }}:v{{ .Major }}.{{ .Minor }}"
-      - "gcr.io/mrmarble/{{ .ProjectName }}:latest"
+      - "ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Tag }}"
+      - "ghcr.io/mrmarble/{{ .ProjectName }}:v{{ .Major }}"
+      - "ghcr.io/mrmarble/{{ .ProjectName }}:v{{ .Major }}.{{ .Minor }}"
+      - "ghcr.io/mrmarble/{{ .ProjectName }}:latest"
 
 archives:
   - format: zip
