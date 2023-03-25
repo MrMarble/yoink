@@ -26,4 +26,4 @@ jobs:
           args: "release --clean"
           version: latest
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_TOKEN: "${{ secrets.CONTAINER_REGISTRY_TOKEN }}"
