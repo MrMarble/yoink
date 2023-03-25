@@ -63,7 +63,7 @@ Environemnt variables will override config file
 
 CLI parameters will override enviroment variables
 
-```shell
+```
 $ yoink --help
 Usage: yoink <command>
 
