@@ -100,5 +100,5 @@ Docker:
 $ docker run -e "PROWLARR_API_KEY=XXXXXXXXXX" \
     -e "QBITTORRENT_PASS=SecurePassword" \
     -v ./config.yaml:/config.yaml:ro \
-    gcr.io/mrmarble/yoink:latest
+    ghcr.io/mrmarble/yoink:latest
 ```
