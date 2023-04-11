@@ -55,7 +55,7 @@ type config struct {
 		APIKey string `yaml:"api_key"`
 	}
 	DownloadDir       string `yaml:"download_dir"`
-	TotalFreelechSize string `yaml:"total_freelech_size"`
+	TotalFreelechSize string `yaml:"total_freeleech_size"`
 	Indexers          []struct {
 		ID         int
 		MaxSeeders int    `yaml:"max_seeders"`
