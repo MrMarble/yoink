@@ -38,9 +38,10 @@ type cli struct {
 	Config *config `name:"config" help:"configuration file." type:"yamlfile" short:"c" required:""`
 	DryRun bool    `help:"Dry run. Don't upload torrents to qBittorrent."`
 
-	Run      RunCmd      `cmd:"" help:"Run yoink." default:"1" hidden:""`
-	Indexers IndexersCmd `cmd:"" help:"List indexers."`
-	Version  VersionFlag `name:"version" help:"print version information and quit"`
+	Run         RunCmd         `cmd:"" help:"Run yoink." default:"1" hidden:""`
+	Indexers    IndexersCmd    `cmd:"" help:"List indexers."`
+	PrintConfig PrintConfigCmd `cmd:"" help:"Print the configuration."`
+	Version     VersionFlag    `name:"version" help:"print version information and quit"`
 }
 
 type config struct {
@@ -93,6 +94,22 @@ func unifyConfig(cli *cli) (*yoink.Config, error) {
 		DownloadDir: cli.Config.DownloadDir,
 		Category:    cli.Config.Category,
 		Paused:      cli.Config.Paused,
+		Prowlarr: struct {
+			Host   string
+			APIKey string
+		}{
+			Host:   cli.Config.Prowlarr.Host,
+			APIKey: cli.Config.Prowlarr.APIKey,
+		},
+		QbitTorrent: struct {
+			Host string
+			User string
+			Pass string
+		}{
+			Host: cli.Config.QbitTorrent.Host,
+			User: cli.Config.QbitTorrent.User,
+			Pass: cli.Config.QbitTorrent.Pass,
+		},
 	}
 
 	// Override config with CLI flags
