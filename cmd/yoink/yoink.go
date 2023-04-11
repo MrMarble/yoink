@@ -35,7 +35,7 @@ type cli struct {
 	QbitTorrentUser string `help:"qBitTorrent user to authenticante with" name:"qbittorrent-user" env:"QBITTORRENT_USER"`
 	QbitTorrentPass string `help:"qBitTorrent password to authenticante with" name:"qbittorrent-pass" env:"QBITTORRENT_PASS"`
 
-	Config *config `name:"config" help:"configuration file." type:"yamlfile" short:"c"`
+	Config *config `name:"config" help:"configuration file." type:"yamlfile" short:"c" required:""`
 	DryRun bool    `help:"Dry run. Don't upload torrents to qBittorrent."`
 
 	Run      RunCmd      `cmd:"" help:"Run yoink." default:"1" hidden:""`
