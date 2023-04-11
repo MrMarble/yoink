@@ -141,8 +141,8 @@ func unifyConfig(cli *cli) (*yoink.Config, error) {
 		return nil, fmt.Errorf("qBitTorrent URL must be specified")
 	}
 
-	if cli.Config.TotalFreelechSize != "" {
-		size, err := humanize.ParseBytes(cli.Config.TotalFreelechSize)
+	if cli.Config.TotalFreeleechSize != "" {
+		size, err := humanize.ParseBytes(cli.Config.TotalFreeleechSize)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse total freelech size: %w", err)
 		}
