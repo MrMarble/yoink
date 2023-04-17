@@ -13,7 +13,7 @@ func mockServer(t *testing.T) *httptest.Server {
 		switch r.URL.Path {
 		case "/api/v2/torrents/info":
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`[{"name":"test","size":123,"category":"test","hash":"test","tracker":"test"}]`))
+			_, _ = w.Write([]byte(`[{"name":"test","size":123,"category":"test","hash":"test","tracker":"test"}]`))
 		default:
 			t.Errorf("unexpected request: %s", r.URL.Path)
 		}
