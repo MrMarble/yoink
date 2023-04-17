@@ -25,7 +25,7 @@ func TestParseTorrentFile(t *testing.T) {
 	want := Torrent{
 		Announce: "http://yoink.tracker",
 		Name:     "yoink",
-		Hash:     "2cebb70fef00a76d7f8adcee2b334fe1d2b0332d",
+		Hash:     "f926f7989c3343875ab20fa6ff7ccdfbc59b227c",
 	}
 
 	if *torrent != want {
