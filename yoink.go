@@ -33,7 +33,7 @@ type Config struct {
 	DownloadDir string
 
 	// Max space to use for downloads. If 0, no limit is applied
-	TotalFreelechSize uint64
+	TotalFreeleechSize uint64
 
 	// List of indexers to use. Filters out any indexers not in this list
 	Indexers []struct {
@@ -109,7 +109,7 @@ func FilterTorrentBySize(torrents []prowlarr.SearchResult, config *Config) ([]pr
 	}
 
 	// If the total size of the torrents is greater than the max freelech size, don't download anything
-	if totalSize >= config.TotalFreelechSize {
+	if totalSize >= config.TotalFreeleechSize {
 		return nil, nil
 	}
 
@@ -127,7 +127,7 @@ func filterTorrentsByDiskSize(config *Config, totalSize uint64, torrents []prowl
 	availableSpace := du.Available(config.DownloadDir) - totalSize
 
 	// If the available space is less than the max freelech size, don't download anything
-	if availableSpace < config.TotalFreelechSize {
+	if availableSpace < config.TotalFreeleechSize {
 		return nil
 	}
 

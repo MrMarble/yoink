@@ -17,8 +17,8 @@ func (r *RunCmd) Run(ctx *Context) error {
 		return err
 	}
 	fmt.Printf("Found %d torrents from %d indexers\n", len(torrents), len(ctx.config.Indexers))
-	if ctx.config.TotalFreelechSize > 0 {
-		fmt.Printf("Filtering by total freeleech size: %s\n", humanize.Bytes(ctx.config.TotalFreelechSize))
+	if ctx.config.TotalFreeleechSize > 0 {
+		fmt.Printf("Filtering by total freeleech size: %s\n", humanize.Bytes(ctx.config.TotalFreeleechSize))
 		torrents, err = yoink.FilterTorrentBySize(torrents, ctx.config)
 		if err != nil {
 			return err

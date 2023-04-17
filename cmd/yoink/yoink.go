@@ -146,7 +146,7 @@ func unifyConfig(cli *cli) (*yoink.Config, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse total freelech size: %w", err)
 		}
-		config.TotalFreelechSize = size
+		config.TotalFreeleechSize = size
 	}
 
 	for _, indexer := range cli.Config.Indexers {

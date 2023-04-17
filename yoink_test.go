@@ -20,7 +20,7 @@ func Test_filterTorrentsByDiskSize(t *testing.T) {
 		args args
 		want []prowlarr.SearchResult
 	}{
-		{"", args{&Config{TotalFreelechSize: 5}, 100, []prowlarr.SearchResult{{Size: 100}}}, []prowlarr.SearchResult{{Size: 100}}},
+		{"", args{&Config{TotalFreeleechSize: 5}, 100, []prowlarr.SearchResult{{Size: 100}}}, []prowlarr.SearchResult{{Size: 100}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
