@@ -10,15 +10,19 @@ import (
 	"strings"
 )
 
+// Client is a qBittorrent client.
 type Client struct {
 	url    string
 	client *http.Client
 }
 
+// Torrent is a torrent.
 type Torrent struct {
 	Name     string `json:"name"`
 	Size     uint64 `json:"size"`
 	Category string `json:"category"`
+	Hash     string `json:"hash"`
+	Tracker  string `json:"tracker"`
 }
 
 func NewClient(url string) *Client {
