@@ -51,7 +51,7 @@ func computeHash(data []byte) ([]byte, error) {
 	needle := []byte{0x3A, 0x69, 0x6E, 0x66, 0x6F}
 
 	// sliding window of 5 bytes
-	for i := 0; i < len(data)-6; i += 6 {
+	for i := 0; i < len(data)-6; i++ {
 		if data[i] == needle[0] && data[i+1] == needle[1] && data[i+2] == needle[2] && data[i+3] == needle[3] && data[i+4] == needle[4] {
 			h := sha1.New() //nolint:gosec // we don't need a strong hash here
 			_, err := h.Write(data[i+5 : len(data)-1])
