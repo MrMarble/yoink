@@ -4,7 +4,6 @@ dotenv: [".env"]
 
 env:
   GCO_ENABLED: 0
-
 tasks:
   run:
     cmds:

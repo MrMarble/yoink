@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine
+FROM scratch
 
 # copy over the binary from the first stage
 COPY yoink /app/yoink
