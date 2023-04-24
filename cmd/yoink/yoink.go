@@ -7,6 +7,7 @@ import (
 	kongyaml "github.com/alecthomas/kong-yaml"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dustin/go-humanize"
+	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/mrmarble/yoink"
 )
 
@@ -29,44 +30,14 @@ func (v VersionFlag) BeforeApply(app *kong.Kong) error {
 }
 
 type cli struct {
-	ProwlarrURL    string `help:"Prowlarr URL" env:"PROWLARR_API_URL"`
-	ProwlarrAPIKey string `help:"Prowlarr API Key." env:"PROWLARR_API_KEY"`
-
-	QBitTorrentURL  string `help:"qBitTorrent URL" name:"qbittorrent-url" env:"QBITTORRENT_URL"`
-	QbitTorrentUser string `help:"qBitTorrent user to authenticante with" name:"qbittorrent-user" env:"QBITTORRENT_USER"`
-	QbitTorrentPass string `help:"qBitTorrent password to authenticante with" name:"qbittorrent-pass" env:"QBITTORRENT_PASS"`
-
-	Config *config `name:"config" help:"configuration file." type:"yamlfile" short:"c" required:""`
-	DryRun bool    `help:"Dry run. Don't upload torrents to qBittorrent."`
+	Config string `name:"config" help:"configuration file." type:"existingfile" short:"c" required:""`
+	DryRun bool   `help:"Dry run. Don't upload torrents to qBittorrent."`
 
 	Run         RunCmd         `cmd:"" help:"Run yoink." default:"1" hidden:""`
 	Indexers    IndexersCmd    `cmd:"" help:"List indexers."`
 	PrintConfig PrintConfigCmd `cmd:"" help:"Print the configuration."`
 	Version     VersionFlag    `name:"version" help:"print version information and quit"`
 }
-
-type config struct {
-	QbitTorrent struct {
-		Host string
-		User string
-		Pass string
-	}
-	Prowlarr struct {
-		Host   string
-		APIKey string `yaml:"api_key"`
-	}
-	DownloadDir        string `yaml:"download_dir"`
-	TotalFreeleechSize string `yaml:"total_freeleech_size"`
-	Indexers           []struct {
-		ID         int
-		MaxSeeders int    `yaml:"max_seeders"`
-		MaxSize    string `yaml:"max_size"`
-	} `yaml:"indexers"`
-	Category string
-	Paused   bool
-}
-
-type Indexer struct{}
 
 type Context struct {
 	config *yoink.Config
@@ -86,51 +57,19 @@ func main() {
 		printBanner(cli.DryRun)
 	}
 
-	cfg, err := unifyConfig(&cli)
-	ctx.FatalIfErrorf(err)
+	cfg, err := parseConfig(&cli)
+	if err != nil {
+		ctx.FatalIfErrorf(err)
+	}
 
 	ctx.FatalIfErrorf(ctx.Run(&Context{config: cfg, dryRun: cli.DryRun}))
 }
 
-func unifyConfig(cli *cli) (*yoink.Config, error) {
-	config := &yoink.Config{
-		DownloadDir: cli.Config.DownloadDir,
-		Category:    cli.Config.Category,
-		Paused:      cli.Config.Paused,
-		Prowlarr: struct {
-			Host   string
-			APIKey string
-		}{
-			Host:   cli.Config.Prowlarr.Host,
-			APIKey: cli.Config.Prowlarr.APIKey,
-		},
-		QbitTorrent: struct {
-			Host string
-			User string
-			Pass string
-		}{
-			Host: cli.Config.QbitTorrent.Host,
-			User: cli.Config.QbitTorrent.User,
-			Pass: cli.Config.QbitTorrent.Pass,
-		},
-	}
-
-	// Override config with CLI flags
-	if cli.ProwlarrURL != "" {
-		config.Prowlarr.Host = cli.ProwlarrURL
-	}
-	if cli.ProwlarrAPIKey != "" {
-		config.Prowlarr.APIKey = cli.ProwlarrAPIKey
-	}
-
-	if cli.QBitTorrentURL != "" {
-		config.QbitTorrent.Host = cli.QBitTorrentURL
-	}
-	if cli.QbitTorrentUser != "" {
-		config.QbitTorrent.User = cli.QbitTorrentUser
-	}
-	if cli.QbitTorrentPass != "" {
-		config.QbitTorrent.Pass = cli.QbitTorrentPass
+func parseConfig(cli *cli) (*yoink.Config, error) {
+	config := &yoink.Config{}
+	err := cleanenv.ReadConfig(cli.Config, config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse config: %w", err)
 	}
 
 	// Validate config
@@ -144,29 +83,18 @@ func unifyConfig(cli *cli) (*yoink.Config, error) {
 		return nil, fmt.Errorf("qBitTorrent URL must be specified")
 	}
 
-	if cli.Config.TotalFreeleechSize != "" {
-		size, err := humanize.ParseBytes(cli.Config.TotalFreeleechSize)
+	if config.TotalFreeleechSize != "" {
+		_, err := humanize.ParseBytes(config.TotalFreeleechSize)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse total freelech size: %w", err)
 		}
-		config.TotalFreeleechSize = size
 	}
 
-	for _, indexer := range cli.Config.Indexers {
-		size, err := humanize.ParseBytes(indexer.MaxSize)
+	for _, indexer := range config.Indexers {
+		_, err := humanize.ParseBytes(indexer.MaxSize)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse max size for indexer %d: %w", indexer.ID, err)
 		}
-		config.Indexers = append(config.Indexers, struct {
-			ID         int
-			MaxSeeders int
-			SeedTime   int
-			MaxSize    uint
-		}{
-			ID:         indexer.ID,
-			MaxSeeders: indexer.MaxSeeders,
-			MaxSize:    uint(size),
-		})
 	}
 
 	return config, nil

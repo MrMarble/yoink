@@ -15,7 +15,8 @@ import (
 type RunCmd struct{}
 
 func (r *RunCmd) Run(ctx *Context) error {
-	fmt.Println("Total download size:", humanize.Bytes(ctx.config.TotalFreeleechSize))
+	fmt.Println("Total download size:", ctx.config.TotalFreeleechSize)
+	parsedTotalSize, _ := humanize.ParseBytes(ctx.config.TotalFreeleechSize)
 
 	// 1. Fetch already downloading torrents from qBittorrent
 	fmt.Print("Checking qbt connection...")
@@ -32,14 +33,14 @@ func (r *RunCmd) Run(ctx *Context) error {
 		usedSpace += t.Size
 	}
 
-	if usedSpace >= ctx.config.TotalFreeleechSize {
+	if usedSpace >= parsedTotalSize {
 		fmt.Println("Not enough space left to download new torrents. Exiting...")
 		return nil
 	}
 
-	spaceLeft := ctx.config.TotalFreeleechSize - usedSpace
+	spaceLeft := parsedTotalSize - usedSpace
 
-	if ctx.config.TotalFreeleechSize <= 0 {
+	if parsedTotalSize <= 0 {
 		spaceLeft = 1024 ^ 6
 	}
 
@@ -56,7 +57,7 @@ func (r *RunCmd) Run(ctx *Context) error {
 
 	// 2. Fetch new freeleech torrents from Prowlarr
 	fmt.Println("Searching for freeleech torrents...")
-	prTorrents, err := yoink.GetTorrents(&ctx.config.Prowlarr, ctx.config.Indexers)
+	prTorrents, err := yoink.GetTorrents(ctx.config, ctx.config.Indexers)
 	if err != nil {
 		return err
 	}
