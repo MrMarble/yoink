@@ -20,30 +20,87 @@ builds:
       - darwin
     goarch:
       - amd64
-      - "386"
       - arm
       - arm64
-
+    goarm:
+      - "6"
+      - "7"
     ignore:
-      - goos: darwin
-        goarch: "386"
       - goos: windows
         goarch: "arm"
       - goos: windows
         goarch: "arm64"
-
     flags:
       - -trimpath
-
     mod_timestamp: "{{ .CommitTimestamp }}"
     ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.ShortCommit}} -X main.date={{.CommitDate}}
 
 dockers:
-  - image_templates:
-      - "ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Tag }}"
-      - "ghcr.io/mrmarble/{{ .ProjectName }}:v{{ .Major }}"
-      - "ghcr.io/mrmarble/{{ .ProjectName }}:v{{ .Major }}.{{ .Minor }}"
-      - "ghcr.io/mrmarble/{{ .ProjectName }}:latest"
+  # https://goreleaser.com/customization/docker/
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - "ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}-amd64"
+      - "ghcr.io/mrmarble/{{ .ProjectName }}:latest-amd64"
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    image_templates:
+      - "ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}-arm64v8"
+      - "ghcr.io/mrmarble/{{ .ProjectName }}:latest-arm64v8"
+    build_flag_templates:
+      - "--platform=linux/arm64/v8"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+  - use: buildx
+    goos: linux
+    goarch: arm
+    goarm: 6
+    image_templates:
+      - "ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}-armv6"
+      - "ghcr.io/mrmarble/{{ .ProjectName }}:latest-armv6"
+    build_flag_templates:
+      - "--platform=linux/arm/v6"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+  - use: buildx
+    goos: linux
+    goarch: arm
+    goarm: 7
+    image_templates:
+      - "ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}-armv7"
+      - "ghcr.io/mrmarble/{{ .ProjectName }}:latest-armv7"
+    build_flag_templates:
+      - "--platform=linux/arm/v7"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+docker_manifests:
+  # https://goreleaser.com/customization/docker_manifest/
+  - name_template: ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}
+    image_templates:
+      - ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}-amd64
+      - ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}-arm64v8
+      - ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}-armv6
+      - ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}-armv7
+  - name_template: ghcr.io/mrmarble/{{ .ProjectName }}:latest
+    image_templates:
+      - ghcr.io/mrmarble/{{ .ProjectName }}:latest-amd64
+      - ghcr.io/mrmarble/{{ .ProjectName }}:latest-arm64v8
+      - ghcr.io/mrmarble/{{ .ProjectName }}:latest-armv6
+      - ghcr.io/mrmarble/{{ .ProjectName }}:latest-armv7
 
 archives:
   - format: zip
