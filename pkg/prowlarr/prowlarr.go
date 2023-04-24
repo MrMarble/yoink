@@ -18,10 +18,11 @@ type Client struct {
 
 // Indexer represents a Prowlarr indexer (Tracker).
 type Indexer struct {
-	ID       int    `json:"id"`
-	Protocol string `json:"protocol"`
-	Name     string `json:"name"`
-	Enable   bool   `json:"enable"`
+	ID          int      `json:"id"`
+	Protocol    string   `json:"protocol"`
+	Name        string   `json:"name"`
+	Enable      bool     `json:"enable"`
+	IndexerUrls []string `json:"indexerUrls"`
 }
 
 // SearchResult represents a search result from Prowlarr.

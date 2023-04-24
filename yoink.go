@@ -8,8 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/mrmarble/yoink/internal/du"      //nolint:typecheck
-	"github.com/mrmarble/yoink/internal/torrent" //nolint:typecheck
+	"github.com/mrmarble/yoink/internal/du" //nolint:typecheck
 	"github.com/mrmarble/yoink/pkg/prowlarr"
 	"github.com/mrmarble/yoink/pkg/qbittorrent"
 )
@@ -24,10 +23,7 @@ type Config struct {
 	}
 
 	// Connection details for Prowlarr
-	Prowlarr struct {
-		Host   string
-		APIKey string
-	}
+	Prowlarr ProwlarrSettings
 
 	// Directory to download to. Used to get the available space on the drive. If empty, space is not checked
 	DownloadDir string
@@ -36,16 +32,7 @@ type Config struct {
 	TotalFreeleechSize uint64
 
 	// List of indexers to use. Filters out any indexers not in this list
-	Indexers []struct {
-		// ID of the indexer in Prowlarr
-		ID int
-		// Maximum number of seeders to allow. 0 = no limit
-		MaxSeeders int
-		// Minimum hours to seed for. 0 = no limit
-		SeedTime int
-		// Maximum file size to allow. 0 = no limit
-		MaxSize uint
-	}
+	Indexers []Indexer
 
 	// Category to use for downloads. Used for automatic deletion of old downloads
 	Category string
@@ -54,15 +41,33 @@ type Config struct {
 	Paused bool
 }
 
-// GetTorrents searches for freeleech torrents in Prowlarr and filters them based on the indexer configuration
-func GetTorrents(config *Config) ([]prowlarr.SearchResult, error) {
-	pClient := prowlarr.NewClient(config.Prowlarr.Host, config.Prowlarr.APIKey)
+type Indexer struct {
+	// ID of the indexer in Prowlarr
+	ID int
+	// Maximum number of seeders to allow. 0 = no limit
+	MaxSeeders int
+	// Minimum hours to seed for. 0 = no limit
+	SeedTime int
+	// Maximum file size to allow. 0 = no limit
+	MaxSize uint
+}
 
-	indexerIds := make([]int, len(config.Indexers))
-	for i, indexer := range config.Indexers {
+type ProwlarrSettings struct {
+	Host   string
+	APIKey string
+}
+
+// GetTorrents searches for freeleech torrents in Prowlarr and filters them based on the indexer configuration
+func GetTorrents(prowlarrSettings *ProwlarrSettings, indexers []Indexer) ([]prowlarr.SearchResult, error) {
+	pClient := prowlarr.NewClient(prowlarrSettings.Host, prowlarrSettings.APIKey)
+
+	indexerIds := make([]int, len(indexers))
+	for i, indexer := range indexers {
 		indexerIds[i] = indexer.ID
 	}
+	var filteredResults []prowlarr.SearchResult
 
+	// TODO: Add support for multiple pages once Prowlarr supports it (currently broken)
 	results, err := pClient.Search(&prowlarr.SearchConfig{
 		Indexers: indexerIds,
 	})
@@ -70,9 +75,8 @@ func GetTorrents(config *Config) ([]prowlarr.SearchResult, error) {
 		return nil, err
 	}
 
-	var filteredResults []prowlarr.SearchResult
 	for _, result := range results {
-		for _, indexer := range config.Indexers {
+		for _, indexer := range indexers {
 			if result.IndexerID == indexer.ID {
 				if (indexer.MaxSeeders == 0 || result.Seeders <= indexer.MaxSeeders) && result.Size <= indexer.MaxSize && result.Seeders > 0 && result.IsFreeleech() {
 					filteredResults = append(filteredResults, result)
@@ -146,31 +150,11 @@ func filterTorrentsByDiskSize(config *Config, totalSize uint64, torrents []prowl
 // 1. Connect to qBittorrent and get the list of torrents
 //
 // 3. Download to memory and check if the torrent is already downloading
-func DownloadTorrent(result *prowlarr.SearchResult, config *Config) (*bytes.Buffer, error) {
-	qClient := qbittorrent.NewClient(config.QbitTorrent.Host) // TODO: Add user/pass
-
-	qTorrents, err := qClient.GetTorrents()
-	if err != nil {
-		return nil, err
-	}
-
+func DownloadTorrent(result *prowlarr.SearchResult) (*bytes.Buffer, error) {
 	buf, err := downloadFile(result.DownloadURL)
 	if err != nil {
 		return nil, err
 	}
-
-	tFile, err := torrent.ParseTorrentFile(buf.Bytes())
-	if err != nil {
-		return nil, err
-	}
-
-	// Check if the torrent is already downloading
-	for _, qTorrent := range qTorrents {
-		if qTorrent.Name == tFile.Name {
-			return nil, nil
-		}
-	}
-
 	return buf, nil
 }
 
@@ -190,4 +174,22 @@ func downloadFile(url string) (*bytes.Buffer, error) {
 	buf := new(bytes.Buffer)
 	_, err = io.Copy(buf, resp.Body)
 	return buf, err
+}
+
+func GetDownloadingTorrents(config *Config) ([]qbittorrent.Torrent, error) {
+	qClient := qbittorrent.NewClient(config.QbitTorrent.Host) // TODO: Add user/pass
+
+	qTorrents, err := qClient.GetTorrents()
+	if err != nil {
+		return nil, err
+	}
+
+	var downloadingTorrents []qbittorrent.Torrent
+	for _, torrent := range qTorrents {
+		if torrent.Category == config.Category {
+			downloadingTorrents = append(downloadingTorrents, torrent)
+		}
+	}
+
+	return downloadingTorrents, nil
 }

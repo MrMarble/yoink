@@ -5,6 +5,7 @@ import (
 
 	"github.com/alecthomas/kong"
 	kongyaml "github.com/alecthomas/kong-yaml"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/dustin/go-humanize"
 	"github.com/mrmarble/yoink"
 )
@@ -65,6 +66,8 @@ type config struct {
 	Paused   bool
 }
 
+type Indexer struct{}
+
 type Context struct {
 	config *yoink.Config
 	dryRun bool
@@ -80,7 +83,7 @@ func main() {
 	)
 
 	if ctx.Validate() == nil {
-		fmt.Printf("yoink %s\n\n", version)
+		printBanner(cli.DryRun)
 	}
 
 	cfg, err := unifyConfig(&cli)
@@ -167,4 +170,27 @@ func unifyConfig(cli *cli) (*yoink.Config, error) {
 	}
 
 	return config, nil
+}
+
+func printBanner(dryRun bool) {
+	const banner = `
+██╗   ██╗ ██████╗ ██╗███╗   ██╗██╗  ██╗
+╚██╗ ██╔╝██╔═══██╗██║████╗  ██║██║ ██╔╝
+ ╚████╔╝ ██║   ██║██║██╔██╗ ██║█████╔╝ 
+  ╚██╔╝  ██║   ██║██║██║╚██╗██║██╔═██╗ 
+   ██║   ╚██████╔╝██║██║ ╚████║██║  ██╗
+   ╚═╝    ╚═════╝ ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝`
+	w := lipgloss.Width(banner)
+
+	fmt.Println(lipgloss.JoinVertical(lipgloss.Top, banner, lipgloss.PlaceHorizontal(w, lipgloss.Center, fmt.Sprintf("%s - MrMarble", version))))
+	fmt.Println()
+	if dryRun {
+		fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000")).
+			Bold(true).
+			Align(lipgloss.Center).
+			Width(w).
+			Border(lipgloss.NormalBorder(), true).
+			Render("Running in dry-run mode.\nNo torrents will be downloaded."))
+		fmt.Println()
+	}
 }
