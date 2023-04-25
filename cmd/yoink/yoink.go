@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/alecthomas/kong"
-	kongyaml "github.com/alecthomas/kong-yaml"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dustin/go-humanize"
 	"github.com/ilyakaznacheev/cleanenv"
@@ -50,7 +49,6 @@ func main() {
 		kong.Name("yoink"),
 		kong.Description("Yoink! Command line tool for finding and downloading freeleech torrents."),
 		kong.UsageOnError(),
-		kong.NamedMapper("yamlfile", kongyaml.YAMLFileMapper),
 	)
 
 	if ctx.Validate() == nil {
