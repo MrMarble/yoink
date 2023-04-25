@@ -34,7 +34,7 @@ func (r *RunCmd) Run(ctx *Context) error {
 	fmt.Printf("Found %d torrents in qBittorrent:\n", len(qbTorrents))
 	usedSpace := uint64(0)
 	for _, t := range qbTorrents {
-		fmt.Printf("  [%s] %s\n", humanize.Bytes(t.Size), cutString(t.Name, 30))
+		fmt.Printf("  [%s] %s\n", humanize.Bytes(t.Size), cutString(t.Name, 50))
 		usedSpace += t.Size
 	}
 
@@ -106,7 +106,7 @@ func (r *RunCmd) Run(ctx *Context) error {
 	fmt.Printf("Uploading %d torrents (%s) to qBittorrent...\n", len(filteredTorrents), humanize.Bytes(downloadSize))
 	for i := range filteredTorrents {
 		torrent := filteredTorrents[i]
-		fmt.Printf("  [%s] [%d/%d] %s\n", humanize.Bytes(uint64(torrent.Size)), torrent.Seeders, torrent.Leechers, cutString(torrent.Title, 30))
+		fmt.Printf("  [%s] [%d/%d] %s\n", humanize.Bytes(uint64(torrent.Size)), torrent.Seeders, torrent.Leechers, cutString(torrent.Title, 50))
 		if !ctx.dryRun {
 			data, err := yoink.DownloadTorrent(&torrent)
 			if err != nil {
