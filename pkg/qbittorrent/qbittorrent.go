@@ -3,9 +3,11 @@ package qbittorrent
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"strings"
 )
@@ -26,10 +28,43 @@ type Torrent struct {
 }
 
 func NewClient(url string) *Client {
+	jar, _ := cookiejar.New(nil)
 	return &Client{
-		url:    url,
-		client: &http.Client{},
+		url: url,
+		client: &http.Client{
+			Jar: jar,
+		},
 	}
+}
+
+func (c *Client) Login(username, password string) error {
+	data := url.Values{}
+	data.Set("username", username)
+	data.Set("password", password)
+	// set headers
+	req, err := http.NewRequest("POST", c.url+"/api/v2/auth/login", strings.NewReader(data.Encode()))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Referer", c.url)
+	req.Header.Set("Origin", c.url)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("bad status: %s", resp.Status)
+	}
+	// check if login was successful
+	if resp.Header.Get("Set-Cookie") == "" {
+		return fmt.Errorf("login failed")
+	}
+
+	return nil
 }
 
 func (c *Client) GetTorrents() ([]Torrent, error) {

@@ -19,13 +19,18 @@ func (r *RunCmd) Run(ctx *Context) error {
 	parsedTotalSize, _ := humanize.ParseBytes(ctx.config.TotalFreeleechSize)
 
 	// 1. Fetch already downloading torrents from qBittorrent
+	qClient := qbittorrent.NewClient(ctx.config.QbitTorrent.Host)
 	fmt.Print("Checking qbt connection...")
-	qbTorrents, err := yoink.GetDownloadingTorrents(ctx.config)
+	err := qClient.Login(ctx.config.QbitTorrent.User, ctx.config.QbitTorrent.Pass)
 	if err != nil {
 		fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000")).Render(" FAIL"))
 		return err
 	}
 	fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#bfff00")).Render(" OK"))
+	qbTorrents, err := yoink.GetDownloadingTorrents(ctx.config, qClient)
+	if err != nil {
+		return err
+	}
 	fmt.Printf("Found %d torrents in qBittorrent:\n", len(qbTorrents))
 	usedSpace := uint64(0)
 	for _, t := range qbTorrents {
@@ -98,7 +103,6 @@ func (r *RunCmd) Run(ctx *Context) error {
 			}
 		}
 	}
-	qClient := qbittorrent.NewClient(ctx.config.QbitTorrent.Host)
 	fmt.Printf("Uploading %d torrents (%s) to qBittorrent...\n", len(filteredTorrents), humanize.Bytes(downloadSize))
 	for i := range filteredTorrents {
 		torrent := filteredTorrents[i]

@@ -77,9 +77,7 @@ func downloadFile(url string) (*bytes.Buffer, error) {
 	return buf, err
 }
 
-func GetDownloadingTorrents(config *Config) ([]qbittorrent.Torrent, error) {
-	qClient := qbittorrent.NewClient(config.QbitTorrent.Host) // TODO: Add user/pass
-
+func GetDownloadingTorrents(config *Config, qClient *qbittorrent.Client) ([]qbittorrent.Torrent, error) {
 	qTorrents, err := qClient.GetTorrents()
 	if err != nil {
 		return nil, err
