@@ -18,7 +18,6 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/rockholla/go-lib v0.0.0-20220822212356-f0b5812b7335 // indirect
 	github.com/stretchr/testify v1.8.1 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
