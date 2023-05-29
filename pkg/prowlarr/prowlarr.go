@@ -40,9 +40,10 @@ type SearchResult struct {
 
 // SearchConfig represents the search configuration.
 type SearchConfig struct {
-	Indexers []int // Indexer IDs
-	Limit    int   // Limit the number of results. Currently not working in Prowlarr
-	Offset   int   // Offset the number of results. Currently not working in Prowlarr
+	Indexers  []int // Indexer IDs
+	Limit     int   // Limit the number of results. Currently not working in Prowlarr
+	Offset    int   // Offset the number of results. Currently not working in Prowlarr
+	FreeLeech bool  // Only return freeleech torrents
 }
 
 func NewClient(url, apiKey string) *Client {
@@ -156,6 +157,18 @@ func (c *Client) Search(config *SearchConfig) ([]SearchResult, error) {
 	var results []SearchResult
 	if err := json.NewDecoder(resp.Body).Decode(&results); err != nil {
 		return nil, err
+	}
+	println("results: ", len(results))
+	if config.FreeLeech {
+		freeleechResults := make([]SearchResult, 0)
+		for _, result := range results {
+			if result.IsFreeleech() {
+				freeleechResults = append(freeleechResults, result)
+			}
+		}
+		println("freeleech: ", len(freeleechResults))
+
+		return freeleechResults, nil
 	}
 
 	return results, nil

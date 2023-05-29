@@ -25,7 +25,8 @@ func GetTorrents(cfg *Config, indexers []Indexer) ([]prowlarr.SearchResult, erro
 
 	// TODO: Add support for multiple pages once Prowlarr supports it (currently broken)
 	results, err := pClient.Search(&prowlarr.SearchConfig{
-		Indexers: indexerIds,
+		Indexers:  indexerIds,
+		FreeLeech: true,
 	})
 	if err != nil {
 		return nil, err
@@ -34,7 +35,7 @@ func GetTorrents(cfg *Config, indexers []Indexer) ([]prowlarr.SearchResult, erro
 	for _, result := range results {
 		for _, indexer := range indexers {
 			if result.IndexerID == indexer.ID {
-				if !result.IsFreeleech() || isStale(result) {
+				if isStale(result) {
 					continue
 				}
 
