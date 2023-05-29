@@ -12,6 +12,8 @@ indexers: # List of indexers to use. Filters out any indexers not in this list
 - id: 1 # ID of the indexer in Prowlarr
   max_seeders: 20 # Maximum number of seeders to allow. 0 = no limit
   max_size: "50GB" # Maximum file size to allow. 0 = no limit
+  min_leechers: 0 # Minimum number of leechers to allow. 0 = no limit
 - id: 3 # ID of the indexer in Prowlarr
   max_seeders: 10 # Maximum number of seeders to allow. 0 = no limit
   max_size: "50GB" # Maximum file size to allow. 0 = no limit
+  min_leechers: 0 # Minimum number of leechers to allow. 0 = no limit

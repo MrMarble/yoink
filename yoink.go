@@ -41,8 +41,9 @@ func GetTorrents(cfg *Config, indexers []Indexer) ([]prowlarr.SearchResult, erro
 				maxSize, _ := humanize.ParseBytes(indexer.MaxSize)
 				validSeeders := indexer.MaxSeeders == 0 || result.Seeders <= indexer.MaxSeeders
 				validSize := maxSize == 0 || uint64(result.Size) <= maxSize
+				validLeechers := indexer.MinLeechers == 0 || result.Leechers >= indexer.MinLeechers
 
-				if validSeeders && validSize {
+				if validSeeders && validSize && validLeechers {
 					filteredResults = append(filteredResults, result)
 				}
 			}

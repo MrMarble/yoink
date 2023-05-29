@@ -33,4 +33,6 @@ type Indexer struct {
 	MaxSeeders int `yaml:"max_seeders" env:"INDEXER_MAX_SEEDERS" env-default:"0" env-description:"Maximum number of seeders to allow. 0 = no limit" comment:"Maximum number of seeders to allow. 0 = no limit"`
 	// Maximum file size to allow. 0 = no limit
 	MaxSize string `yaml:"max_size" env:"INDEXER_MAX_SIZE" env-default:"0" env-description:"Maximum file size to allow. 0 = no limit" comment:"Maximum file size to allow. 0 = no limit"`
+	// Minimum number of leechers to allow. 0 = no limit
+	MinLeechers int `yaml:"min_leechers" env:"INDEXER_MIN_LEECHERS" env-default:"0" env-description:"Minimum number of leechers to allow. 0 = no limit" comment:"Minimum number of leechers to allow. 0 = no limit"`
 }
