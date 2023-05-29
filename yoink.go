@@ -34,8 +34,15 @@ func GetTorrents(cfg *Config, indexers []Indexer) ([]prowlarr.SearchResult, erro
 	for _, result := range results {
 		for _, indexer := range indexers {
 			if result.IndexerID == indexer.ID {
+				if !result.IsFreeleech() || isStale(result) {
+					continue
+				}
+
 				maxSize, _ := humanize.ParseBytes(indexer.MaxSize)
-				if (indexer.MaxSeeders == 0 || result.Seeders <= indexer.MaxSeeders) && uint64(result.Size) <= maxSize && result.Seeders > 0 && result.IsFreeleech() {
+				validSeeders := indexer.MaxSeeders == 0 || result.Seeders <= indexer.MaxSeeders
+				validSize := maxSize == 0 || uint64(result.Size) <= maxSize
+
+				if validSeeders && validSize {
 					filteredResults = append(filteredResults, result)
 				}
 			}
@@ -43,6 +50,11 @@ func GetTorrents(cfg *Config, indexers []Indexer) ([]prowlarr.SearchResult, erro
 	}
 
 	return filteredResults, nil
+}
+
+// isStale checks if the torrent is stale (no seeders)
+func isStale(torrent prowlarr.SearchResult) bool {
+	return torrent.Seeders == 0
 }
 
 // DownloadTorrents downloads the torrents to qBittorrent
