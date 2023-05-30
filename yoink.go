@@ -35,6 +35,7 @@ func GetTorrents(cfg *Config, indexers []Indexer) ([]prowlarr.SearchResult, erro
 	for _, result := range results {
 		for _, indexer := range indexers {
 			if result.IndexerID == indexer.ID {
+				result := result
 				if isStale(&result) {
 					continue
 				}
