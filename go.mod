@@ -30,5 +30,4 @@ require (
 	github.com/dustin/go-humanize v1.0.1
 	github.com/ilyakaznacheev/cleanenv v1.4.2
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/rockholla/go-lib v0.0.0-20220822212356-f0b5812b7335
 )
