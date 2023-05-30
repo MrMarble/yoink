@@ -35,7 +35,7 @@ func GetTorrents(cfg *Config, indexers []Indexer) ([]prowlarr.SearchResult, erro
 	for _, result := range results {
 		for _, indexer := range indexers {
 			if result.IndexerID == indexer.ID {
-				if isStale(result) {
+				if isStale(&result) {
 					continue
 				}
 
@@ -55,7 +55,7 @@ func GetTorrents(cfg *Config, indexers []Indexer) ([]prowlarr.SearchResult, erro
 }
 
 // isStale checks if the torrent is stale (no seeders)
-func isStale(torrent prowlarr.SearchResult) bool {
+func isStale(torrent *prowlarr.SearchResult) bool {
 	return torrent.Seeders == 0
 }
 
