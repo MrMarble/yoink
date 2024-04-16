@@ -158,7 +158,6 @@ func (c *Client) Search(config *SearchConfig) ([]SearchResult, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&results); err != nil {
 		return nil, err
 	}
-	println("results: ", len(results))
 	if config.FreeLeech {
 		freeleechResults := make([]SearchResult, 0)
 		for _, result := range results {
@@ -166,7 +165,6 @@ func (c *Client) Search(config *SearchConfig) ([]SearchResult, error) {
 				freeleechResults = append(freeleechResults, result)
 			}
 		}
-		println("freeleech: ", len(freeleechResults))
 
 		return freeleechResults, nil
 	}
