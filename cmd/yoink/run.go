@@ -53,7 +53,7 @@ func (r *RunCmd) Run(ctx *Context) error {
 
 	// 2. Get indexers from Prowlarr
 	fmt.Print("Checking prowlarr connection...")
-	indexers, err := prowlarr.NewClient(ctx.config.Prowlarr.Host, ctx.config.Prowlarr.APIKey).GetIndexers()
+	_, err = prowlarr.NewClient(ctx.config.Prowlarr.Host, ctx.config.Prowlarr.APIKey).GetIndexers()
 	if err != nil {
 		fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000")).Render(" FAIL"))
 		return err
@@ -67,45 +67,41 @@ func (r *RunCmd) Run(ctx *Context) error {
 		return err
 	}
 
-	// Filter out already downloading torrents
-	filteredTorrents := make([]prowlarr.SearchResult, 0)
+	fmt.Printf("Found %d freeleech torrents:\n", len(prTorrents))
+
+	// Filter torrents
 	downloadSize := uint64(0)
-	for _, prTorrent := range prTorrents {
+	for i, prTorrent := range prTorrents {
+
+		// Filter out torrents that are too big
+		if uint64(prTorrent.Size) > spaceLeft {
+			prTorrents[i] = prTorrents[len(prTorrents)-1]
+			prTorrents = prTorrents[:len(prTorrents)-1]
+			continue
+		}
+
+		isDownloading := false
+
+		// Filter out torrents that are already downloading
 		for _, qbTorrent := range qbTorrents {
-			if uint64(prTorrent.Size) > spaceLeft {
+			if qbTorrent.Name == prTorrent.Title &&
+				qbTorrent.Size == uint64(prTorrent.Size) {
+				isDownloading = true
 				break
-			}
-
-			if qbTorrent.Name != prTorrent.Title && qbTorrent.Size != uint64(prTorrent.Size) {
-				filteredTorrents = append(filteredTorrents, prTorrent)
-				spaceLeft -= uint64(prTorrent.Size)
-				downloadSize += uint64(prTorrent.Size)
-				break
-			}
-
-			// check if is the same tracker
-			sameTracker := false
-			for _, indexer := range indexers {
-				if indexer.ID == prTorrent.IndexerID {
-					for _, url := range indexer.IndexerUrls {
-						if strings.Contains(qbTorrent.Tracker, url) {
-							sameTracker = true
-							break
-						}
-					}
-				}
-			}
-
-			if !sameTracker {
-				filteredTorrents = append(filteredTorrents, prTorrent)
-				spaceLeft -= uint64(prTorrent.Size)
-				downloadSize += uint64(prTorrent.Size)
 			}
 		}
+
+		if isDownloading {
+			prTorrents[i] = prTorrents[len(prTorrents)-1]
+			prTorrents = prTorrents[:len(prTorrents)-1]
+			continue
+		}
+
+		downloadSize += uint64(prTorrent.Size)
 	}
-	fmt.Printf("Uploading %d torrents (%s) to qBittorrent...\n", len(filteredTorrents), humanize.Bytes(downloadSize))
-	for i := range filteredTorrents {
-		torrent := filteredTorrents[i]
+	fmt.Printf("Uploading %d torrents (%s) to qBittorrent...\n", len(prTorrents), humanize.Bytes(downloadSize))
+	for i := range prTorrents {
+		torrent := prTorrents[i]
 		fmt.Printf("  [%s] [%d/%d] %s\n", humanize.Bytes(uint64(torrent.Size)), torrent.Seeders, torrent.Leechers, cutString(torrent.Title, 50))
 		if !ctx.dryRun {
 			data, err := yoink.DownloadTorrent(&torrent)
