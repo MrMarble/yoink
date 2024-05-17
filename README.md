@@ -9,7 +9,7 @@
 
 `yoink` is an app designed to help you download torrents marked as `free leech` in order to mantain your ratio in private trackers.
 
-`yoink` can search all your trackers using [prowlarr](https://github.com/Prowlarr/Prowlarr) as the indexer and automatically add them to you [qBitTorrent](https://github.com/qbittorrent/qBittorrent) client to start seeding
+`yoink` can search all your trackers using [prowlarr](https://github.com/Prowlarr/Prowlarr) as the indexer and automatically add them to your [qBitTorrent](https://github.com/qbittorrent/qBittorrent) client to start seeding
 
 ## Basic behavior
 
@@ -27,7 +27,7 @@ Some properties can be passed by environment variable.
 ```yaml
 total_freeleech_size: "200GB" # Max space to use for downloads. If 0, no limit is applied
 category: "FreeLeech" # Category to use for downloads.
-paused: true # Whether to pause torrents after adding them to qBittorrentf
+paused: true # Whether to pause torrents after adding them to qBittorrent
 qbittorrent: # Connection details for qBittorrent
   host: "http://localhost:8080"
   username: "admin"
@@ -48,7 +48,7 @@ indexers: # List of indexers to use. Filters out any indexers not in this list
 <!-- END_CONFIG_FILE -->
 ### Environment
 
-Environemnt variables will override config file
+Environment variables will override config file
 <!-- ENV_VARS -->
 ```
 Environment variables:
@@ -73,7 +73,7 @@ Environment variables:
 
 ## Usage
 
-CLI parameters will override enviroment variables
+CLI parameters will override environment variables
 
 ```
 $ yoink --help
@@ -100,7 +100,7 @@ Run "yoink <command> --help" for more information on a command.
 Example:
 
 ```shell
-# don't save sensible info in config file
+# don't save sensitive info in config file
 $ PROWLARR_API_KEY=XXXXXXXXXX QBIT_PASS=SecurePassword yoink --config ./config.yaml
 ```
 
