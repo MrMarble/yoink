@@ -120,7 +120,10 @@ func (c *Client) AddTorrentFromBuffer(file *bytes.Buffer, fileName string, optio
 			return err
 		}
 	}
-	writer.Close()
+	err = writer.Close()
+	if err != nil {
+		return err
+	}
 
 	resp, err := c.client.Post(c.url+"/api/v2/torrents/add", writer.FormDataContentType(), body)
 	if err != nil {

@@ -23,5 +23,9 @@ func Available(path string) uint64 {
 		return 0
 	}
 
+	if available < 0 {
+		return 0
+	}
+
 	return uint64(available)
 }
