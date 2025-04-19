@@ -1,7 +1,6 @@
-FROM scratch
+FROM gcr.io/distroless/static-debian12
 
 # copy over the binary from the first stage
-COPY yoink /app/yoink
+COPY yoink /yoink
 
-WORKDIR "/app"
-ENTRYPOINT ["/app/yoink", "-c /config.yaml"]
+CMD ["/yoink", "-c", "/config.yaml"]

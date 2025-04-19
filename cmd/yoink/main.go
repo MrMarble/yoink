@@ -44,7 +44,7 @@ type Context struct {
 }
 
 func main() {
-	var cli cli //nolint:govet
+	var cli cli
 	ctx := kong.Parse(&cli,
 		kong.Name("yoink"),
 		kong.Description("Yoink! Command line tool for finding and downloading freeleech torrents."),
@@ -72,10 +72,10 @@ func parseConfig(cli *cli) (*yoink.Config, error) {
 
 	// Validate config
 	if config.Prowlarr.Host == "" {
-		return nil, fmt.Errorf("Prowlarr URL must be specified")
+		return nil, fmt.Errorf("prowlarr URL must be specified")
 	}
 	if config.Prowlarr.APIKey == "" {
-		return nil, fmt.Errorf("Prowlarr API Key must be specified")
+		return nil, fmt.Errorf("prowlarr API Key must be specified")
 	}
 	if config.QbitTorrent.Host == "" {
 		return nil, fmt.Errorf("qBitTorrent URL must be specified")

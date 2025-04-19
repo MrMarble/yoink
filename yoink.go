@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/dustin/go-humanize" //nolint:typecheck
+	"github.com/dustin/go-humanize"
 	"github.com/mrmarble/yoink/pkg/prowlarr"
 	"github.com/mrmarble/yoink/pkg/qbittorrent"
 )
@@ -17,15 +17,15 @@ import (
 func GetTorrents(cfg *Config, indexers []Indexer) ([]prowlarr.SearchResult, error) {
 	pClient := prowlarr.NewClient(cfg.Prowlarr.Host, cfg.Prowlarr.APIKey)
 
-	indexerIds := make([]int, len(indexers))
+	indexerIDs := make([]int, len(indexers))
 	for i, indexer := range indexers {
-		indexerIds[i] = indexer.ID
+		indexerIDs[i] = indexer.ID
 	}
 	var filteredResults []prowlarr.SearchResult
 
 	// TODO: Add support for multiple pages once Prowlarr supports it (currently broken)
 	results, err := pClient.Search(&prowlarr.SearchConfig{
-		Indexers:  indexerIds,
+		Indexers:  indexerIDs,
 		FreeLeech: true,
 	})
 	if err != nil {
@@ -60,7 +60,7 @@ func isStale(torrent *prowlarr.SearchResult) bool {
 	return torrent.Seeders == 0
 }
 
-// DownloadTorrents downloads the torrents to qBittorrent
+// DownloadTorrent downloads the torrents to qBittorrent
 // Filters out any torrents that are already downloading
 //
 // 1. Connect to qBittorrent and get the list of torrents
@@ -92,6 +92,7 @@ func downloadFile(url string) (*bytes.Buffer, error) {
 	return buf, err
 }
 
+// GetDownloadingTorrents retrieves the list of torrents currently downloading in qBittorrent
 func GetDownloadingTorrents(config *Config, qClient *qbittorrent.Client) ([]qbittorrent.Torrent, error) {
 	qTorrents, err := qClient.GetTorrents()
 	if err != nil {

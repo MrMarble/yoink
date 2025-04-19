@@ -1,5 +1,5 @@
 /*
-Prowlarr API Client.
+Package prowlarr provides a client for the Prowlarr API.
 Prowlarr docs: https://prowlarr.com/docs/api
 */
 package prowlarr
