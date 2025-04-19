@@ -67,19 +67,6 @@ dockers:
   - use: buildx
     goos: linux
     goarch: arm
-    goarm: 6
-    image_templates:
-      - "ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}-armv6"
-      - "ghcr.io/mrmarble/{{ .ProjectName }}:latest-armv6"
-    build_flag_templates:
-      - "--platform=linux/arm/v6"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-  - use: buildx
-    goos: linux
-    goarch: arm
     goarm: 7
     image_templates:
       - "ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}-armv7"
