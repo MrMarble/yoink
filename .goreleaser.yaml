@@ -26,7 +26,6 @@ builds:
       - arm
       - arm64
     goarm:
-      - "6"
       - "7"
     ignore:
       - goos: windows
@@ -83,13 +82,11 @@ docker_manifests:
     image_templates:
       - ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}-amd64
       - ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}-arm64v8
-      - ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}-armv6
       - ghcr.io/mrmarble/{{ .ProjectName }}:{{ .Version }}-armv7
   - name_template: ghcr.io/mrmarble/{{ .ProjectName }}:latest
     image_templates:
       - ghcr.io/mrmarble/{{ .ProjectName }}:latest-amd64
       - ghcr.io/mrmarble/{{ .ProjectName }}:latest-arm64v8
-      - ghcr.io/mrmarble/{{ .ProjectName }}:latest-armv6
       - ghcr.io/mrmarble/{{ .ProjectName }}:latest-armv7
 
 archives:
