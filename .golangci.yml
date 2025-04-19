@@ -5,3 +5,31 @@ formatters:
   settings:
     gofumpt:
       extra-rules: true
+
+linters:
+  enable:
+    - gosec
+    - revive
+    - gocritic
+    - goconst
+    - bodyclose
+    - nonamedreturns
+    - decorder
+    - dupl
+    - prealloc
+    - unconvert
+  exclusions:
+    rules:
+      - linters:
+          - errcheck
+        text: ".Close` is not checked"
+      - linters:
+          - revive
+        text: "should have comment or be unexported"
+      - linters:
+          - revive
+        text: "should have a package comment"
+  settings:
+    gosec:
+      excludes:
+        - G103
