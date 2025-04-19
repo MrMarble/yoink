@@ -71,37 +71,25 @@ func (r *RunCmd) Run(ctx *Context) error {
 
 	// Filter torrents
 	downloadSize := uint64(0)
-	for i, prTorrent := range prTorrents {
+	filteredResults := make([]prowlarr.SearchResult, 0)
+	for _, prTorrent := range prTorrents {
 
 		// Filter out torrents that are too big
 		if uint64(prTorrent.Size) > spaceLeft {
-			prTorrents[i] = prTorrents[len(prTorrents)-1]
-			prTorrents = prTorrents[:len(prTorrents)-1]
 			continue
 		}
 
-		isDownloading := false
-
 		// Filter out torrents that are already downloading
-		for _, qbTorrent := range qbTorrents {
-			if qbTorrent.Name == prTorrent.Title &&
-				qbTorrent.Size == uint64(prTorrent.Size) {
-				isDownloading = true
-				break
-			}
-		}
-
-		if isDownloading {
-			prTorrents[i] = prTorrents[len(prTorrents)-1]
-			prTorrents = prTorrents[:len(prTorrents)-1]
+		if isTorrentDownloading(prTorrent, qbTorrents) {
 			continue
 		}
 
 		downloadSize += uint64(prTorrent.Size)
+		filteredResults = append(filteredResults, prTorrent)
 	}
-	fmt.Printf("Uploading %d torrents (%s) to qBittorrent...\n", len(prTorrents), humanize.Bytes(downloadSize))
-	for i := range prTorrents {
-		torrent := prTorrents[i]
+	fmt.Printf("Uploading %d torrents (%s) to qBittorrent...\n", len(filteredResults), humanize.Bytes(downloadSize))
+	for i := range filteredResults {
+		torrent := filteredResults[i]
 		fmt.Printf("  [%s] [%d/%d] %s\n", humanize.Bytes(uint64(torrent.Size)), torrent.Seeders, torrent.Leechers, cutString(torrent.Title, 50))
 		if !ctx.dryRun {
 			data, err := yoink.DownloadTorrent(&torrent)
@@ -116,6 +104,15 @@ func (r *RunCmd) Run(ctx *Context) error {
 
 	}
 	return nil
+}
+
+func isTorrentDownloading(torrent prowlarr.SearchResult, torrents []qbittorrent.Torrent) bool {
+	for _, t := range torrents {
+		if t.Name == torrent.Title && t.Size == uint64(torrent.Size) {
+			return true
+		}
+	}
+	return false
 }
 
 func cutString(s string, l int) string {
