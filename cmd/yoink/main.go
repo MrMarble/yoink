@@ -71,11 +71,28 @@ func parseConfig(cli *cli) (*yoink.Config, error) {
 	}
 
 	// Validate config
-	if config.Prowlarr.Host == "" {
-		return nil, fmt.Errorf("prowlarr URL must be specified")
+	if config.IndexerType == "" {
+		config.IndexerType = "prowlarr" // Default to prowlarr for backward compatibility
 	}
-	if config.Prowlarr.APIKey == "" {
-		return nil, fmt.Errorf("prowlarr API Key must be specified")
+	
+	if config.IndexerType != "prowlarr" && config.IndexerType != "jackett" {
+		return nil, fmt.Errorf("indexer_type must be either 'prowlarr' or 'jackett'")
+	}
+	
+	if config.IndexerType == "prowlarr" {
+		if config.Prowlarr.Host == "" {
+			return nil, fmt.Errorf("prowlarr URL must be specified when using prowlarr indexer")
+		}
+		if config.Prowlarr.APIKey == "" {
+			return nil, fmt.Errorf("prowlarr API Key must be specified when using prowlarr indexer")
+		}
+	} else if config.IndexerType == "jackett" {
+		if config.Jackett.Host == "" {
+			return nil, fmt.Errorf("jackett URL must be specified when using jackett indexer")
+		}
+		if config.Jackett.APIKey == "" {
+			return nil, fmt.Errorf("jackett API Key must be specified when using jackett indexer")
+		}
 	}
 	if config.QbitTorrent.Host == "" {
 		return nil, fmt.Errorf("qBitTorrent URL must be specified")
@@ -91,7 +108,7 @@ func parseConfig(cli *cli) (*yoink.Config, error) {
 	for _, indexer := range config.Indexers {
 		_, err := humanize.ParseBytes(indexer.MaxSize)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse max size for indexer %d: %w", indexer.ID, err)
+			return nil, fmt.Errorf("failed to parse max size for indexer %v: %w", indexer.ID, err)
 		}
 	}
 

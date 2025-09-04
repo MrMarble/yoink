@@ -1,23 +1,20 @@
 total_freeleech_size: "200GB" # Max space to use for downloads. If 0, no limit is applied
 category: "FreeLeech" # Category to use for downloads.
-paused: true # Whether to pause torrents after adding them to qBittorrentf
-indexer_type: "prowlarr" # Type of indexer to use: prowlarr or jackett
+paused: true # Whether to pause torrents after adding them to qBittorrent
+indexer_type: "jackett" # Type of indexer to use: prowlarr or jackett
 qbittorrent: # Connection details for qBittorrent
   host: "http://localhost:8080"
   username: "admin"
   password: "adminadmin"
-prowlarr: # Connection details for Prowlarr
-  host: "http://localhost:8081"
-  api_key: "1234567890"
 jackett: # Connection details for Jackett
   host: "http://localhost:9117"
   api_key: "1234567890"
-indexers: # List of indexers to use. Filters out any indexers not in this list
-- id: 1 # ID of the indexer (integer for Prowlarr, string for Jackett)
+indexers: # List of indexers to use. For Jackett, use indexer IDs as strings
+- id: "tracker1" # ID of the indexer (string for Jackett)
   max_seeders: 20 # Maximum number of seeders to allow. 0 = no limit
   max_size: "50GB" # Maximum file size to allow. 0 = no limit
   min_leechers: 0 # Minimum number of leechers to allow. 0 = no limit
-- id: 3 # ID of the indexer (integer for Prowlarr, string for Jackett)
+- id: "tracker2" # ID of the indexer (string for Jackett)
   max_seeders: 10 # Maximum number of seeders to allow. 0 = no limit
   max_size: "50GB" # Maximum file size to allow. 0 = no limit
   min_leechers: 0 # Minimum number of leechers to allow. 0 = no limit
