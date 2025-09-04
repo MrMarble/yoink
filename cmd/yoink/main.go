@@ -74,11 +74,11 @@ func parseConfig(cli *cli) (*yoink.Config, error) {
 	if config.IndexerType == "" {
 		config.IndexerType = "prowlarr" // Default to prowlarr for backward compatibility
 	}
-	
+
 	if config.IndexerType != "prowlarr" && config.IndexerType != "jackett" {
 		return nil, fmt.Errorf("indexer_type must be either 'prowlarr' or 'jackett'")
 	}
-	
+
 	if config.IndexerType == "prowlarr" {
 		if config.Prowlarr.Host == "" {
 			return nil, fmt.Errorf("prowlarr URL must be specified when using prowlarr indexer")

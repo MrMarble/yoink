@@ -37,7 +37,7 @@ type Config struct {
 
 type Indexer struct {
 	// ID of the indexer (integer for Prowlarr, string for Jackett)
-	ID   interface{} `yaml:"id" env:"INDEXER_ID" env-description:"ID of the indexer (integer for Prowlarr, string for Jackett)" comment:"ID of the indexer (integer for Prowlarr, string for Jackett)"`
+	ID interface{} `yaml:"id" env:"INDEXER_ID" env-description:"ID of the indexer (integer for Prowlarr, string for Jackett)" comment:"ID of the indexer (integer for Prowlarr, string for Jackett)"`
 	// Maximum number of seeders to allow. 0 = no limit
 	MaxSeeders int `yaml:"max_seeders" env:"INDEXER_MAX_SEEDERS" env-default:"0" env-description:"Maximum number of seeders to allow. 0 = no limit" comment:"Maximum number of seeders to allow. 0 = no limit"`
 	// Maximum file size to allow. 0 = no limit

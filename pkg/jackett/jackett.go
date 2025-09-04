@@ -30,16 +30,18 @@ type Indexer struct {
 
 // SearchResult represents a search result from Jackett.
 type SearchResult struct {
-	Title       string `xml:"title"`
-	Link        string `xml:"link"`
-	Description string `xml:"description"`
-	GUID        string `xml:"guid"`
-	Category    string `xml:"category"`
-	Size        uint64 `xml:"size"`
-	Seeders     int    `xml:"seeders"`
-	Peers       int    `xml:"peers"`
-	DownloadURL string
-	IndexerID   string
+	Title                string  `xml:"title"`
+	Link                 string  `xml:"link"`
+	Description          string  `xml:"description"`
+	GUID                 string  `xml:"guid"`
+	Category             string  `xml:"category"`
+	Size                 uint64  `xml:"size"`
+	Seeders              int     `xml:"seeders"`
+	Peers                int     `xml:"peers"`
+	DownloadVolumeFactor float64 // Torznab field: 0 = freeleech, 1 = normal download
+	HasVolumeFactor      bool    // Track if DownloadVolumeFactor was explicitly set
+	DownloadURL          string
+	IndexerID            string
 }
 
 // SearchConfig represents the search configuration for Jackett.
@@ -180,7 +182,7 @@ func (c *Client) Search(config *SearchConfig) ([]SearchResult, error) {
 			GUID:        item.GUID,
 			Category:    item.Category,
 			Description: item.Description,
-			DownloadURL: item.Link, // Jackett usually provides direct download links
+			DownloadURL: item.Link,              // Jackett usually provides direct download links
 			IndexerID:   extractIndexerID(item), // Extract indexer ID from the item
 		}
 
@@ -198,6 +200,11 @@ func (c *Client) Search(config *SearchConfig) ([]SearchResult, error) {
 			case "peers":
 				if peers, err := strconv.Atoi(attr.Value); err == nil {
 					result.Peers = peers
+				}
+			case "downloadvolumefactor":
+				if factor, err := strconv.ParseFloat(attr.Value, 64); err == nil {
+					result.DownloadVolumeFactor = factor
+					result.HasVolumeFactor = true
 				}
 			}
 		}
@@ -219,9 +226,21 @@ func (c *Client) Search(config *SearchConfig) ([]SearchResult, error) {
 	return results, nil
 }
 
-// IsFreeleech attempts to determine if a torrent is freeleech based on available information
-// Since Jackett doesn't provide explicit freeleech flags, this uses heuristics
+// IsFreeleech determines if a torrent is freeleech
+// First checks DownloadVolumeFactor (Torznab standard) if available, then falls back to heuristics
 func (s *SearchResult) IsFreeleech() bool {
+	// Primary method: Check DownloadVolumeFactor if explicitly set
+	// 0 means freeleech, 1 means normal download
+	if s.HasVolumeFactor && s.DownloadVolumeFactor == 0 {
+		return true
+	}
+
+	// If DownloadVolumeFactor is explicitly set to non-zero, it's not freeleech
+	if s.HasVolumeFactor && s.DownloadVolumeFactor > 0 {
+		return false
+	}
+
+	// Fallback to heuristics if DownloadVolumeFactor is not available
 	// Check title for common freeleech indicators
 	title := strings.ToLower(s.Title)
 	freelechIndicators := []string{
@@ -242,8 +261,6 @@ func (s *SearchResult) IsFreeleech() bool {
 			return true
 		}
 	}
-
-	// TODO: Add tracker-specific heuristics based on category or other fields
 
 	return false
 }

@@ -8,8 +8,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dustin/go-humanize"
 	"github.com/mrmarble/yoink"
-	"github.com/mrmarble/yoink/pkg/jackett"
-	"github.com/mrmarble/yoink/pkg/prowlarr"
 	"github.com/mrmarble/yoink/pkg/qbittorrent"
 )
 
@@ -53,23 +51,18 @@ func (r *RunCmd) Run(ctx *Context) error {
 	fmt.Printf("Used space: %s, Left: %s\n", humanize.Bytes(usedSpace), humanize.Bytes(spaceLeft))
 
 	// 2. Check indexer connection
-	if ctx.config.IndexerType == "prowlarr" {
-		fmt.Print("Checking prowlarr connection...")
-		_, err = prowlarr.NewClient(ctx.config.Prowlarr.Host, ctx.config.Prowlarr.APIKey).GetIndexers()
-		if err != nil {
-			fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000")).Render(" FAIL"))
-			return err
-		}
-		fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#bfff00")).Render(" OK"))
-	} else if ctx.config.IndexerType == "jackett" {
-		fmt.Print("Checking jackett connection...")
-		_, err = jackett.NewClient(ctx.config.Jackett.Host, ctx.config.Jackett.APIKey).GetIndexers()
-		if err != nil {
-			fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000")).Render(" FAIL"))
-			return err
-		}
-		fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#bfff00")).Render(" OK"))
+	fmt.Printf("Checking %s connection...", ctx.config.IndexerType)
+	manager, err := yoink.GetIndexerManager(ctx.config)
+	if err != nil {
+		fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000")).Render(" FAIL"))
+		return err
 	}
+	_, err = manager.GetIndexers()
+	if err != nil {
+		fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000")).Render(" FAIL"))
+		return err
+	}
+	fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#bfff00")).Render(" OK"))
 
 	// 3. Fetch new freeleech torrents from indexer
 	fmt.Printf("Searching for freeleech torrents using %s...\n", ctx.config.IndexerType)
@@ -82,7 +75,7 @@ func (r *RunCmd) Run(ctx *Context) error {
 
 	// Filter torrents
 	downloadSize := uint64(0)
-	filteredResults := make([]yoink.CommonSearchResult, 0)
+	filteredResults := make([]yoink.SearchResult, 0)
 	for _, torrent := range torrents {
 
 		// Filter out torrents that are too big
@@ -108,17 +101,14 @@ func (r *RunCmd) Run(ctx *Context) error {
 		torrent := filteredResults[i]
 		fmt.Printf("  [%s] [%d/%d] %s\n", humanize.Bytes(torrent.GetSize()), torrent.GetSeeders(), torrent.GetLeechers(), cutString(torrent.GetTitle(), 50))
 		if !ctx.dryRun {
-			data, err := yoink.DownloadTorrent(&torrent)
+			data, err := yoink.DownloadTorrent(torrent)
 			if err != nil {
 				return err
 			}
-			
-			// Extract filename for qBittorrent
+
+			// Use torrent title as filename
 			filename := torrent.GetTitle()
-			if torrent.GetProwlarrResult() != nil {
-				filename = torrent.GetProwlarrResult().FileName
-			}
-			
+
 			err = qClient.AddTorrentFromBuffer(data, filename, map[string]string{"category": ctx.config.Category, "paused": strconv.FormatBool(ctx.config.Paused)})
 			if err != nil {
 				return err
@@ -129,7 +119,7 @@ func (r *RunCmd) Run(ctx *Context) error {
 	return nil
 }
 
-func isTorrentDownloading(torrent yoink.CommonSearchResult, torrents []qbittorrent.Torrent) bool {
+func isTorrentDownloading(torrent yoink.SearchResult, torrents []qbittorrent.Torrent) bool {
 	for _, t := range torrents {
 		if t.Name == torrent.GetTitle() && t.Size == torrent.GetSize() {
 			return true
