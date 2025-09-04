@@ -9,3 +9,5 @@ config.yaml
 task_linux_amd64.tar.gz
 task
 completion/
+# Docker testing artifacts
+downloads/

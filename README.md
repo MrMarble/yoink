@@ -168,3 +168,23 @@ $ docker run -e "INDEXER_TYPE=jackett" \
     -v ./config.yaml:/config.yaml:ro \
     ghcr.io/mrmarble/yoink:latest
 ```
+
+## Testing with Docker Compose
+
+For local testing and development, a complete Docker Compose setup is provided that includes Prowlarr, Jackett, and qBittorrent:
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Access web interfaces:
+# - qBittorrent: http://localhost:8080 (admin/adminadmin)  
+# - Prowlarr: http://localhost:8081
+# - Jackett: http://localhost:9117
+
+# Test yoink with either indexer
+./yoink --config ./config.docker.prowlarr.yaml --dry-run
+./yoink --config ./config.docker.jackett.yaml --dry-run
+```
+
+See [DOCKER-TESTING.md](DOCKER-TESTING.md) for complete setup instructions.
