@@ -1,0 +1,16 @@
+total_freeleech_size: "200GB"
+category: "FreeLeech"
+paused: true
+indexer_type: "prowlarr"
+qbittorrent:
+  host: "http://qbittorrent:8080"  # Docker service name
+  username: "admin"
+  password: "adminadmin"
+prowlarr:
+  host: "http://prowlarr:9696"     # Docker service name and internal port
+  api_key: "YOUR_PROWLARR_API_KEY_HERE"
+indexers:
+- id: 1
+  max_seeders: 20
+  max_size: "50GB"
+  min_leechers: 0

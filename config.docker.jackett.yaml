@@ -1,0 +1,16 @@
+total_freeleech_size: "200GB"
+category: "FreeLeech"
+paused: true
+indexer_type: "jackett"
+qbittorrent:
+  host: "http://qbittorrent:8080"  # Docker service name
+  username: "admin"
+  password: "adminadmin"
+jackett:
+  host: "http://jackett:9117"      # Docker service name
+  api_key: "YOUR_JACKETT_API_KEY_HERE"
+indexers:
+- id: "tracker1"
+  max_seeders: 20
+  max_size: "50GB"
+  min_leechers: 0

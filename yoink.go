@@ -9,55 +9,82 @@ import (
 	"net/http"
 
 	"github.com/dustin/go-humanize"
-	"github.com/mrmarble/yoink/pkg/prowlarr"
 	"github.com/mrmarble/yoink/pkg/qbittorrent"
 )
 
-// GetTorrents searches for freeleech torrents in Prowlarr and filters them based on the indexer configuration
-func GetTorrents(cfg *Config, indexers []Indexer) ([]prowlarr.SearchResult, error) {
-	pClient := prowlarr.NewClient(cfg.Prowlarr.Host, cfg.Prowlarr.APIKey)
-
-	indexerIDs := make([]int, len(indexers))
-	for i, indexer := range indexers {
-		indexerIDs[i] = indexer.ID
-	}
-	var filteredResults []prowlarr.SearchResult
-
-	// TODO: Add support for multiple pages once Prowlarr supports it (currently broken)
-	results, err := pClient.Search(&prowlarr.SearchConfig{
-		Indexers:  indexerIDs,
-		FreeLeech: true,
-	})
+// GetTorrents searches for freeleech torrents using the configured indexer and filters them based on the indexer configuration
+func GetTorrents(cfg *Config, indexers []Indexer) ([]SearchResult, error) {
+	manager, err := GetIndexerManager(cfg)
 	if err != nil {
 		return nil, err
 	}
 
+	// Convert indexers to the appropriate ID format
+	var indexerIDs []interface{}
+	for _, indexer := range indexers {
+		if cfg.IndexerType == "prowlarr" {
+			indexerIDs = append(indexerIDs, indexer.GetProwlarrID())
+		} else {
+			indexerIDs = append(indexerIDs, indexer.GetJackettID())
+		}
+	}
+
+	// Search for torrents
+	searchConfig := SearchConfig{
+		Indexers:  indexerIDs,
+		FreeLeech: true,
+	}
+
+	results, err := manager.Search(searchConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	// Filter results based on indexer configuration
+	var filteredResults []SearchResult
 	for _, result := range results {
+		if isStale(result) {
+			continue
+		}
+
+		// Check if result matches any indexer criteria
+		validForAnyIndexer := false
 		for _, indexer := range indexers {
-			if result.IndexerID == indexer.ID {
-				result := result
-				if isStale(&result) {
-					continue
-				}
-
-				maxSize, _ := humanize.ParseBytes(indexer.MaxSize)
-				validSeeders := indexer.MaxSeeders == 0 || result.Seeders <= indexer.MaxSeeders
-				validSize := maxSize == 0 || uint64(result.Size) <= maxSize
-				validLeechers := indexer.MinLeechers == 0 || result.Leechers >= indexer.MinLeechers
-
-				if validSeeders && validSize && validLeechers {
-					filteredResults = append(filteredResults, result)
-				}
+			if isValidForIndexer(result, indexer, cfg.IndexerType) {
+				validForAnyIndexer = true
+				break
 			}
+		}
+
+		if validForAnyIndexer {
+			filteredResults = append(filteredResults, result)
 		}
 	}
 
 	return filteredResults, nil
 }
 
+// isValidForIndexer checks if a result matches an indexer's criteria
+func isValidForIndexer(result SearchResult, indexer Indexer, indexerType string) bool {
+	// For Prowlarr, we can match by exact indexer ID
+	if indexerType == "prowlarr" {
+		if result.GetIndexerID() != indexer.GetProwlarrID() {
+			return false
+		}
+	}
+	// For Jackett, indexer matching is less reliable, so we apply filters to all results
+
+	maxSize, _ := humanize.ParseBytes(indexer.MaxSize)
+	validSeeders := indexer.MaxSeeders == 0 || result.GetSeeders() <= indexer.MaxSeeders
+	validSize := maxSize == 0 || result.GetSize() <= maxSize
+	validLeechers := indexer.MinLeechers == 0 || result.GetLeechers() >= indexer.MinLeechers
+
+	return validSeeders && validSize && validLeechers
+}
+
 // isStale checks if the torrent is stale (no seeders)
-func isStale(torrent *prowlarr.SearchResult) bool {
-	return torrent.Seeders == 0
+func isStale(result SearchResult) bool {
+	return result.GetSeeders() == 0
 }
 
 // DownloadTorrent downloads the torrents to qBittorrent
@@ -66,8 +93,8 @@ func isStale(torrent *prowlarr.SearchResult) bool {
 // 1. Connect to qBittorrent and get the list of torrents
 //
 // 3. Download to memory and check if the torrent is already downloading
-func DownloadTorrent(result *prowlarr.SearchResult) (*bytes.Buffer, error) {
-	buf, err := downloadFile(result.DownloadURL)
+func DownloadTorrent(result SearchResult) (*bytes.Buffer, error) {
+	buf, err := downloadFile(result.GetDownloadURL())
 	if err != nil {
 		return nil, err
 	}

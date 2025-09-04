@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # qBittorrent - Torrent client
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: yoink-qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+      - WEBUI_PORT=8080
+    volumes:
+      - qbittorrent-config:/config
+      - ./downloads:/downloads
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - yoink-network
+
+  # Prowlarr - Indexer manager
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: yoink-prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+    volumes:
+      - prowlarr-config:/config
+    ports:
+      - "8081:9696"
+    restart: unless-stopped
+    networks:
+      - yoink-network
+
+  # Jackett - Alternative indexer manager
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    container_name: yoink-jackett
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+      - AUTO_UPDATE=true
+    volumes:
+      - jackett-config:/config
+      - ./downloads:/downloads
+    ports:
+      - "9117:9117"
+    restart: unless-stopped
+    networks:
+      - yoink-network
+
+  # Optional: Run yoink application for testing
+  # Uncomment this service to test yoink in the same network
+  # yoink:
+  #   build: .
+  #   container_name: yoink-app
+  #   volumes:
+  #     - ./config.sample.yaml:/config.yaml:ro
+  #     - ./downloads:/downloads
+  #   command: ["/yoink", "--config", "/config.yaml", "--dry-run"]
+  #   depends_on:
+  #     - qbittorrent
+  #     - prowlarr
+  #     - jackett
+  #   networks:
+  #     - yoink-network
+
+volumes:
+  qbittorrent-config:
+  prowlarr-config:
+  jackett-config:
+
+networks:
+  yoink-network:
+    driver: bridge
